@@ -1,6 +1,7 @@
 package cc.ytdttj.bigblackclock44;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -21,6 +22,7 @@ public class MainActivity extends Activity {
     private TextView batteryTextView;
     private Handler handler;
     private BroadcastReceiver batteryReceiver;
+    private TextView sleepStatusTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +32,14 @@ public class MainActivity extends Activity {
         clockTextView = findViewById(R.id.clockTextView);
         batteryTextView = findViewById(R.id.batteryTextView);
         handler = new Handler();
+        sleepStatusTextView = findViewById(R.id.sleepStatusTextView);
 
         // 创建一个线程用于更新时钟
         Runnable updateTimeRunnable = new Runnable() {
             @Override
             public void run() {
                 updateTime();
+                updateSleepStatus();
                 handler.postDelayed(this, 1000); // 每秒更新一次
             }
         };
@@ -74,6 +78,23 @@ public class MainActivity extends Activity {
         String currentTime = sdf.format(new Date());
         clockTextView.setText(currentTime);
     }
+
+    // 更新睡眠状态文本和文本颜色
+    private void updateSleepStatus() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH", Locale.getDefault());
+        int currentHour = Integer.parseInt(sdf.format(new Date()));
+        String statusText = "";
+
+        if (currentHour >= 23 || currentHour < 6) {
+            statusText = "该上床睡觉了";
+            clockTextView.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
+        } else {
+            clockTextView.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+        }
+
+        sleepStatusTextView.setText(statusText);
+    }
+
 
     @Override
     protected void onDestroy() {
